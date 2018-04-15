@@ -28,7 +28,9 @@ void process_command(string const& s, char* envp[])
             cur_arg += s[i];
             i++;
         }
-        arguments.push_back(strdup(cur_arg.c_str()));
+        char* str_duplicate = strdup(cur_arg.c_str());
+        arguments.push_back(str_duplicate);
+        free(str_duplicate);
         cur_arg = "";
         i++;
     }
