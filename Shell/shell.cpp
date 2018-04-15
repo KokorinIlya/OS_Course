@@ -17,11 +17,6 @@ void print_invitation()
 
 void process_command(string const& s)
 {
-    if (s == "exit")
-    {
-        printf("exiting...\n");
-        exit(0);
-    }
     vector<char*> arguments;
     string cur_arg;
     int i = 0;
@@ -39,7 +34,9 @@ void process_command(string const& s)
     }
     if (arguments.empty())
     {
-        perror("cannot specify program from output");
+        printf("cannot specify program from output\n");
+        fflush(stdout);
+        print_invitation();
         return;
     }
 
@@ -87,7 +84,6 @@ void fill_zero(char* const buff, ssize_t len)
 
 int main()
 {
-    printf("type exit for exiting\n");
     print_invitation();
 
     while (true)
@@ -116,8 +112,13 @@ int main()
         }
         if (bytes_read == -1)
         {
-            perror("error reading from standart output");
+            perror("error reading from standard input");
             exit(1);
+        }
+        if (bytes_read == 0)
+        {
+            printf("exiting...\n");
+            exit(0);
         }
     }
 }
