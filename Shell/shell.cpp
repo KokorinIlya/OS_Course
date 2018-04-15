@@ -30,7 +30,6 @@ void process_command(string const& s, char* envp[])
         }
         char* str_duplicate = strdup(cur_arg.c_str());
         arguments.push_back(str_duplicate);
-        free(str_duplicate);
         cur_arg = "";
         i++;
     }
@@ -67,6 +66,11 @@ void process_command(string const& s, char* envp[])
         printf("\nprogram finished with return code ");
         printf("%d\n", exit_result);
         fflush(stdout);
+
+        for (int j = 0; j < arguments.size(); j++)
+        {
+            free(arguments[j]);
+        }
     }
     else
     {
