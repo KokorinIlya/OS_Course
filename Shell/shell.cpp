@@ -15,7 +15,7 @@ void print_invitation()
     fflush(stdout);
 }
 
-void process_command(string const& s)
+void process_command(string const& s, char* envp[])
 {
     vector<char*> arguments;
     string cur_arg;
@@ -45,7 +45,7 @@ void process_command(string const& s)
     pid_t pid_id = fork();
     if (pid_id == 0)
     {
-        int res = execvp(arguments[0], arguments.data());
+        int res = execve(arguments[0], arguments.data(), envp);
         if (res < 0)
         {
             perror("program terminated with non-zero exit code");
@@ -82,7 +82,7 @@ void fill_zero(char* const buff, ssize_t len)
     }
 }
 
-int main()
+int main(int argc, char* argv[], char* envp[])
 {
     print_invitation();
 
@@ -100,7 +100,7 @@ int main()
             {
                 if (cur_char == '\n')
                 {
-                    process_command(cur_command);
+                    process_command(cur_command, envp);
                     cur_command = "";
                 }
                 else
