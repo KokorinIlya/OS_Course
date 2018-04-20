@@ -1,5 +1,6 @@
 #include <dlfcn.h>
 #include <cstdlib>
+#include <cstdio>
 
 #include "../static/print_sum.h"
 #include "../static/add_numbers.h"
@@ -19,7 +20,7 @@ int main()
 
     if (extern_library == nullptr)
     {
-        dlerror();
+        printf("%s\n", dlerror());
         exit(1);
     }
 
@@ -27,7 +28,7 @@ int main()
 
     if (print_mul == nullptr)
     {
-        dlerror();
+        printf("%s\n", dlerror());
         dlclose(extern_library);
         exit(2);
     }
