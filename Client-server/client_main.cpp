@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <utility>
+#include <algorithm>
 
 #include "constants_and_types.h"
 #include "dict_socket.h"
@@ -67,12 +68,16 @@ int main(int argc, char* argv[])
         string request;
         getline(cin, request);
         request += "\r\n";
+        std::transform(request.begin(), request.end(), request.begin(), ::tolower);
+
         socket.send(request);
+        cout << "Request sent" << endl;
 
         string answer = read_until_crlf(socket, "").first;
-        cout << answer << endl;
+        cout << "Response received: " + answer << endl;
     }
-    catch (std::runtime_error& e) {
+    catch (std::runtime_error& e)
+    {
         std::cerr << e.what() << endl;
         return EXIT_FAILURE;
     }

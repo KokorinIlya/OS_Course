@@ -18,12 +18,13 @@ using std::pair;
 using std::endl;
 
 dict_socket listener{};
+bool need_to_terminate = false;
 
 void sigint_handler(int signum)
 {
     cout << "SIGINT catched, exiting...";
     listener.close();
-    exit(0);
+    need_to_terminate = true;
 }
 
 int main(int argc, char* argv[])
@@ -35,13 +36,17 @@ int main(int argc, char* argv[])
         listener.bind();
         listener.listen();
 
-        dict_socket socket = listener.accept();
-        pair<string, string> p = read_until_crlf(socket, "");
-        string request = p.first;
+        while (!need_to_terminate)
+        {
+            dict_socket socket = listener.accept();
+            pair<string, string> p = read_until_crlf(socket, "");
+            string request = p.first;
 
-        cout << "Request received: " + request << endl;
+            cout << "Request received: " + request << endl;
 
-        socket.send("502 Command not implemented\r\n");
+            socket.send("502 Command not implemented\r\n");
+        }
+
 
     }
     catch (std::runtime_error& e)

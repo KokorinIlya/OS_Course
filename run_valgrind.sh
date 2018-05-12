@@ -1,1 +1,1 @@
-valgrind --leak-check=full -v $1
+valgrind --leak-check=full --show-leak-kinds=all -v $1 $2
