@@ -3,6 +3,7 @@
 //
 
 #include "dict_socket.h"
+#include "utils.h"
 #include <stdexcept>
 #include <vector>
 #include <iostream>
@@ -13,6 +14,8 @@ using std::vector;
 using std::cout;
 using std::cin;
 using std::cerr;
+using std::pair;
+using std::endl;
 
 dict_socket listener{};
 
@@ -31,24 +34,21 @@ int main(int argc, char* argv[])
         signal(SIGINT, &sigint_handler);
         listener.bind();
         listener.listen();
+
+        dict_socket socket = listener.accept();
+        pair<string, string> p = read_until_crlf(socket, "");
+        string request = p.first;
+
+        cout << "Request received: " + request << endl;
+
+        socket.send("502 Command not implemented\r\n");
+
     }
     catch (std::runtime_error& e)
     {
         cout << e.what();
         return EXIT_FAILURE;
     }
-
-    dict_socket socket = listener.accept();
-
-    size_t bytes_sent = 0;
-
-    while (bytes_sent < string("world").size())
-    {
-        string r = socket.recieve().first;
-        socket.send(r);
-        bytes_sent += r.size();
-    }
-
 
     return EXIT_SUCCESS;
 }

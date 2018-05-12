@@ -14,6 +14,7 @@
 
 #include "constants_and_types.h"
 #include "dict_socket.h"
+#include "utils.h"
 
 using std::string;
 using std::vector;
@@ -62,31 +63,19 @@ int main(int argc, char* argv[])
     {
         socket.create();
         socket.connect(address);
+        cout << "Please, enter your request" << endl;
+        string request;
+        getline(cin, request);
+        request += "\r\n";
+        socket.send(request);
+
+        string answer = read_until_crlf(socket, "").first;
+        cout << answer << endl;
     }
-    catch (std::runtime_error& e)
-    {
+    catch (std::runtime_error& e) {
         std::cerr << e.what() << endl;
         return EXIT_FAILURE;
     }
-
-    string request;
-
-    cout << "Please, enter your request" << endl;
-
-    getline(cin, request);
-
-    request += "\r\n";
-
-    socket.send(request);
-
-
-    size_t totally_received = 0;
-    do
-    {
-        pair<string, ssize_t> p = socket.recieve();
-        cout << p.first << endl;
-        totally_received += p.second;
-    } while (totally_received < request.size());
 
     return EXIT_SUCCESS;
 }

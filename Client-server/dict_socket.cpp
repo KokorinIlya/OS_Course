@@ -4,6 +4,7 @@
 
 #include "dict_socket.h"
 #include "constants_and_types.h"
+#include "utils.h"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <stdexcept>
@@ -20,13 +21,15 @@ void dict_socket::create()
     if (fd < 0)
     {
         perror("Socket creating error");
-        throw std::runtime_error("error creating dict_socket: " + errno);
+        throw std::runtime_error("error creating dict_socket: " +
+            get_error_description());
     }
     int reusable = 1;
     if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &reusable, sizeof(reusable)) == -1)
     {
         perror("Error setting socket options");
-        throw std::runtime_error("error setting socket options: " + errno);
+        throw std::runtime_error("error setting socket options: " +
+            get_error_description());
     }
 }
 
@@ -48,11 +51,12 @@ void dict_socket::connect(uint32_t address)
     if (::connect(fd, (sockaddr *) &socket_address, sizeof(socket_address)) == -1)
     {
         perror("Connection error");
-        throw std::runtime_error("cannot connect to server: " + errno);
+        throw std::runtime_error("cannot connect to server: "
+                                 + get_error_description());
     }
 }
 
-std::pair<std::string, ssize_t > dict_socket::recieve()
+std::pair<std::string, ssize_t> dict_socket::recieve()
 {
     char buffer[BUFFER_SIZE + 1];
 
@@ -61,7 +65,8 @@ std::pair<std::string, ssize_t > dict_socket::recieve()
     if (bytes_read == -1)
     {
         perror("Read error");
-        throw std::runtime_error("error reading from dict_socket: " + errno);
+        throw std::runtime_error("error reading from dict_socket: "
+                                 + get_error_description());
     }
 
     buffer[bytes_read] = '\0';
@@ -81,7 +86,8 @@ void dict_socket::send(std::string const &s)
         if (sent == -1)
         {
             perror("Write error");
-            throw std::runtime_error("error writing to dict_socket: " + errno);
+            throw std::runtime_error("error writing to dict_socket: "
+                                     + get_error_description());
         }
         totally_sent += static_cast<size_t>(sent);
     }
@@ -97,7 +103,8 @@ void dict_socket::bind()
     if (::bind(fd, (sockaddr *) &address, sizeof(address)) == -1)
     {
         perror("Bind error");
-        throw std::runtime_error("Cannot bind to the specified port: " + errno);
+        throw std::runtime_error("Cannot bind to the specified port: "
+                                 + get_error_description());
     }
 }
 
@@ -106,7 +113,8 @@ void dict_socket::listen()
     if (::listen(fd, 0) == -1)
     {
         perror("Listening error");
-        throw std::runtime_error("Error listening: " + errno);
+        throw std::runtime_error("Error listening: "
+                                 + get_error_description());
     }
 }
 
@@ -137,7 +145,8 @@ dict_socket dict_socket::accept()
     if (socket_fd == -1)
     {
         perror("Accepting error");
-        throw std::runtime_error("Error accepting socket " + errno);
+        throw std::runtime_error("Error accepting socket "
+                                 + get_error_description());
     }
     return dict_socket(socket_fd);
 }
