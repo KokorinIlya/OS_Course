@@ -25,6 +25,12 @@ using std::cin;
 using std::cerr;
 using std::pair;
 
+void wait_for_connection(dict_socket& socket)
+{
+    string connection_message = socket.recieve().first;
+    cout << "Connection message: " << connection_message << endl;
+}
+
 int main(int argc, char* argv[])
 {
     if (argc != 2)
@@ -64,6 +70,8 @@ int main(int argc, char* argv[])
     {
         socket.create();
         socket.connect(address);
+        wait_for_connection(socket);
+
         cout << "Please, enter your request" << endl;
         string request;
         getline(cin, request);

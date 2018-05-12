@@ -8,6 +8,8 @@
 #include <vector>
 #include <iostream>
 #include <signal.h>
+#include <algorithm>
+#include <sstream>
 
 using std::string;
 using std::vector;
@@ -27,6 +29,26 @@ void sigint_handler(int signum)
     need_to_terminate = true;
 }
 
+string get_connection_message()
+{
+    return "220, connected successfully\r\n";
+}
+
+vector<string> parse_request(string const& request)
+{
+    vector<string> tokens;
+    std::string token;
+    std::istringstream tokenStream(request);
+    while (std::getline(tokenStream, token, ' '))
+    {
+        if (token != " " && !token.empty())
+        {
+            tokens.push_back(token);
+        }
+    }
+    return tokens;
+}
+
 int main(int argc, char* argv[])
 {
     try
@@ -39,10 +61,19 @@ int main(int argc, char* argv[])
         while (!need_to_terminate)
         {
             dict_socket socket = listener.accept();
+
+            socket.send(get_connection_message());
+
             pair<string, string> p = read_until_crlf(socket, "");
             string request = p.first;
 
             cout << "Request received: " + request << endl;
+
+            vector<string> parts = parse_request(request);
+            for (size_t i = 0; i < parts.size(); ++i)
+            {
+                cout << "Part № " << i << " - " << parts[i] << endl;
+            }
 
             socket.send("502 Command not implemented\r\n");
         }

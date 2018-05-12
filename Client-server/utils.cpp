@@ -37,9 +37,8 @@ pair<string, string> read_until_crlf(dict_socket& socket, string const& init)
         {
             if (!cur.empty() && cur[0] == '\n')
             {
-                res += '\n';
                 //cout << "Res: " << res  << ", Cur: " << cur << endl;
-                return {res, cur.substr(1)};
+                return {res.substr(0, res.size() - 1), cur.substr(1)};
             }
         }
         if (!cur.empty())
