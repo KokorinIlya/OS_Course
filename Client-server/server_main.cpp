@@ -72,8 +72,8 @@ void process_show_info(dict_socket& socket, string const& name)
 
 bool process_client(dict_socket& socket)
 {
-    pair<string, string> p = read_until_crlf(socket, "");
-    string request = p.first;
+    read_result p = read_until_crlf(socket, "");
+    string request = p.querry;
     std::replace(request.begin(), request.end(), '\t', ' ');
     std::transform(request.begin(), request.end(), request.begin(), ::tolower);
     vector<string> parts = parse_querry(request);
@@ -176,8 +176,8 @@ int main(int argc, char* argv[])
 
             try
             {
-                pair<string, string> p = read_until_crlf(socket, "");
-                string request = p.first;
+                read_result p = read_until_crlf(socket, "");
+                string request = p.querry;
                 std::replace(request.begin(), request.end(), '\t', ' ');
                 std::transform(request.begin(), request.end(), request.begin(), ::tolower);
                 process_request(socket, request);

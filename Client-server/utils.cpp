@@ -18,7 +18,7 @@ string get_error_description()
     return strerror(errno);
 }
 
-pair<string, string> read_until_crlf(dict_socket& socket, string const& init)
+read_result read_until_crlf(dict_socket& socket, string const& init)
 {
     string res = init;
 
@@ -32,14 +32,14 @@ pair<string, string> read_until_crlf(dict_socket& socket, string const& init)
         {
             res += cur.substr(0, crlf_pos);
             //cout << "Res: " << res  << ", Cur: " << cur << endl;
-            return {res, cur.substr(crlf_pos + 2)};
+            return {res, cur.substr(crlf_pos + 2), false};
         }
         if (has_cr)
         {
             if (!cur.empty() && cur[0] == '\n')
             {
                 //cout << "Res: " << res  << ", Cur: " << cur << endl;
-                return {res.substr(0, res.size() - 1), cur.substr(1)};
+                return {res.substr(0, res.size() - 1), cur.substr(1), false};
             }
         }
         if (!cur.empty())
@@ -47,7 +47,7 @@ pair<string, string> read_until_crlf(dict_socket& socket, string const& init)
             has_cr = (cur[cur.size() - 1] == '\r');
         }
     }
-    throw std::runtime_error("Input stopped without \\r\\n");
+    return {"", "", true};
 }
 
 vector<string> parse_querry(string const &request)

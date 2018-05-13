@@ -27,10 +27,10 @@ using std::pair;
 
 void wait_for_connection(dict_socket& socket)
 {
-    string connection_message = read_until_crlf(socket, "").first;
+    string connection_message = read_until_crlf(socket, "").querry;
     cout << "Connection message: " << connection_message << endl;
     socket.send("client some-client-info\r\n");
-    string client_message = read_until_crlf(socket, "").first;
+    string client_message = read_until_crlf(socket, "").querry;
     cout << "Client info message: " << client_message << endl;
 }
 
@@ -38,7 +38,7 @@ string send_trivial_request(dict_socket& socket, string const& request)
 {
     socket.send(request);
     cout << "Request sent" << endl;
-    return read_until_crlf(socket, "").first;
+    return read_until_crlf(socket, "").querry;
 }
 
 string get_request(vector<string> const& v)
