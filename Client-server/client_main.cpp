@@ -87,6 +87,21 @@ void process_request(dict_socket& socket, string const& request)
         cout << "SHOW SERVER request" << endl;
         cout << "Response received: " << send_trivial_request(socket, true_request) << endl;
     }
+    else if (parts.size() == 1 && parts[0] == "status")
+    {
+        cout << "STATUS request" << endl;
+        cout << "Response received: " << send_trivial_request(socket, true_request) << endl;
+    }
+    else if (parts.size() == 1 && parts[0] == "help")
+    {
+        cout << "HELP request" << endl;
+        cout << "Response received: " << send_trivial_request(socket, true_request) << endl;
+    }
+    else if (parts.size() == 1 && parts[0] == "quit")
+    {
+        cout << "QUIT request" << endl;
+        cout << "Response received: " << send_trivial_request(socket, true_request) << endl;
+    }
     else
     {
         cout << "Warning: Unknown request" << endl;
@@ -142,7 +157,6 @@ int main(int argc, char* argv[])
         std::transform(request.begin(), request.end(), request.begin(), ::tolower);
 
         std::replace(request.begin(), request.end(), '\t', ' ');
-        cout << request << endl;
 
         process_request(socket, request);
     }

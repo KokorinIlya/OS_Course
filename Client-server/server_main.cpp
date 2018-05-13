@@ -90,7 +90,7 @@ bool process_client(dict_socket& socket)
     }
 }
 
-void process_request(dict_socket& socket, string const& request)
+bool process_request(dict_socket& socket, string const& request, bool first)
 {
 
     cout << "Request received: " + request << endl;
@@ -99,6 +99,21 @@ void process_request(dict_socket& socket, string const& request)
     {
         cout << "Part № " << i << " - " << parts[i] << endl;
     }
+    if (first)
+    {
+        if (!parts.empty() && parts[0] == "client")
+        {
+            cout << "CLIENT request: " << endl;
+            socket.send("250 ok client information received\r\n");
+            return false;
+        }
+        else
+        {
+            socket.send("500 Error, CLIENT request should be first\r\n");
+            return true;
+        }
+    }
+
 
     if (parts.size() == 2 && parts[0] == "show" &&
             (parts[1] == "db" || parts[1] == "databases"))
@@ -129,6 +144,22 @@ void process_request(dict_socket& socket, string const& request)
         cout << "MATCH request: " << endl;
         socket.send("551 Invalid strategy, use \"SHOW STRAT\" for a list of strategies\r\n");
     }
+    else if (parts.size() == 1 && parts[0] == "status")
+    {
+        cout << "STATUS request: " << endl;
+        socket.send("210 server working properly\r\n");
+    }
+    else if (parts.size() == 1 && parts[0] == "help")
+    {
+        cout << "HELP request: " << endl;
+        socket.send("113 read https://tools.ietf.org/html/rfc2229 for help\r\n");
+    }
+    else if (parts.size() == 1 && parts[0] == "quit")
+    {
+        cout << "QUIT request: " << endl;
+        socket.send("221 Closing Connection\r\n");
+        return true;
+    }
     else if (!parts.empty() && parts[0] == "client")
     {
         cout << "CLIENT request: " << endl;
@@ -138,7 +169,7 @@ void process_request(dict_socket& socket, string const& request)
     {
         socket.send("502 Command not implemented\r\n");
     }
-
+    return false;
 
 }
 
@@ -169,24 +200,27 @@ int main(int argc, char* argv[])
             dict_socket socket = listener.accept();
 
             socket.send(get_connection_message());
-            if (!process_client(socket))
-            {
-                continue;
-            }
 
-            try
+            read_result res {"", "", false};
+            string request;
+            string rem;
+
+            bool first = true;
+
+            do
             {
-                read_result p = read_until_crlf(socket, "");
-                string request = p.querry;
+                res = read_until_crlf(socket, rem);
+                request = res.querry;
+                rem = res.remainder;
+
                 std::replace(request.begin(), request.end(), '\t', ' ');
                 std::transform(request.begin(), request.end(), request.begin(), ::tolower);
-                process_request(socket, request);
-            }
-            catch (...)
-            {
-                cout << "Client is processed with error, continuing..." << endl;
-            }
-
+                if(process_request(socket, request, first))
+                {
+                    break;
+                }
+                first = false;
+            } while (!res.empty_input);
 
         }
 
