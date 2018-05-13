@@ -153,6 +153,7 @@ https://tools.ietf.org/html/rfc2229
 Поддерживаемые на данный момент комады:
 
     3.1 - Initial connection
+    3.2 - DEFINE
     3.3 - MATCH
     3.5 - SHOW
     3.6 - CLIENT
