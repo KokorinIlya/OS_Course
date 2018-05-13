@@ -54,6 +54,7 @@ void process_show_db(dict_socket &socket)
     {
         res += " " + p.first + ",";
     }
+    res.pop_back();
     res += "\r\n";
     socket.send(res);
 }
@@ -88,7 +89,7 @@ void process_define_request(dict_socket& socket, vector<string>& parts)
             return;
         }
         socket.send("150 1 definitions retrieved - definitions follow\r\n");
-        socket.send("151 " + word + " " + database + "\r\n");
+        socket.send("151 " + cur_dict[word] + " " + database + "\r\n");
         socket.send("250 ok\r\n");
         return;
     }
