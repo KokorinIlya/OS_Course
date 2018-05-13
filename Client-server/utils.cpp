@@ -20,10 +20,10 @@ string get_error_description()
 
 read_result read_until_crlf(dict_socket& socket, string const& init)
 {
-    if (init.size() >= 2 && init[init.size() - 1] == '\n' &&
-            init[init.size() - 2] == '\r')
+    size_t has_crlf = init.find("\r\n");
+    if (has_crlf != string::npos)
     {
-        return {init, "", false};
+        return {init.substr(0, has_crlf), init.substr(has_crlf + 2), false};
     }
 
     string res = init;
@@ -34,6 +34,7 @@ read_result read_until_crlf(dict_socket& socket, string const& init)
     while (!(cur = socket.recieve().first).empty())
     {
         size_t crlf_pos = cur.find("\r\n");
+        //cout << "Cur: " << cur << endl;
         if (crlf_pos != string::npos)
         {
             res += cur.substr(0, crlf_pos);

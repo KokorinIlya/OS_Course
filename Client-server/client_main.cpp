@@ -69,7 +69,6 @@ void send_define_request(dict_socket& socket, string const& request)
     string rem = find_result.remainder;
     do
     {
-        //cout << "Reading" << endl;
         find_result = read_until_crlf(socket, rem);
         cur = find_result.querry;
         rem = find_result.remainder;

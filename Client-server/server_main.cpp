@@ -81,8 +81,55 @@ void process_define_request(dict_socket& socket, vector<string>& parts)
             socket.send("550 Invalid database, use \"SHOW DB\" for list of databases\r\n");
             return;
         }
-        socket.send("150 n definitions retrieved - definitions follow\r\n");
+        map<string, string> cur_dict = dicts[database];
+        if (cur_dict.count(word) == 0)
+        {
+            socket.send("552 No match\r\n");
+            return;
+        }
+        socket.send("150 1 definitions retrieved - definitions follow\r\n");
+        socket.send("151 " + word + " " + database + "\r\n");
         socket.send("250 ok\r\n");
+        return;
+    }
+    if (database == "!")
+    {
+        vector <pair<string, string>> answers;
+        for (auto const& dict: dicts)
+        {
+            if (dict.second.count(word) > 0)
+            {
+                answers.emplace_back(dict.second.at(word), dict.first);
+            }
+        }
+        if (answers.empty())
+        {
+            socket.send("552 No match\r\n");
+            return;
+        }
+        socket.send("150 " +
+                    std::to_string(answers.size()) +
+                    " definitions retrieved - definitions follow\r\n");
+        for (auto const& answer: answers)
+        {
+            socket.send("151 "  + answer.first + " " + answer.second + "\r\n");
+        }
+        socket.send("250 ok\r\n");
+        return;
+    }
+    if (database == "*")
+    {
+        for (auto const& dict: dicts)
+        {
+            if (dict.second.count(word) > 0)
+            {
+                socket.send("150 1 definitions retrieved - definitions follow\r\n");
+                socket.send("151 " + dict.second.at(word) + " " + dict.first + "\r\n");
+                socket.send("250 ok\r\n");
+                return;
+            }
+        }
+        socket.send("552 No match\r\n");
         return;
     }
 }
