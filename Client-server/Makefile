@@ -8,7 +8,7 @@ all: client server
 client: client_main.o dict_socket.o utils.o
 	g++ -std=c++17 -o client $^
 
-server: server_main.o dict_socket.o utils.o
+server: server_main.o dict_socket.o utils.o fill_db.o
 	g++ -std=c++17 -o server $^
 
 run-client: client 

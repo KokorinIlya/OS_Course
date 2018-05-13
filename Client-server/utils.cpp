@@ -7,6 +7,7 @@
 #include "utils.h"
 
 using std::string;
+using std::vector;
 using std::pair;
 using std::make_pair;
 using std::cout;
@@ -47,4 +48,19 @@ pair<string, string> read_until_crlf(dict_socket& socket, string const& init)
         }
     }
     throw std::runtime_error("Input stopped without \\r\\n");
+}
+
+vector<string> parse_querry(string const &request)
+{
+    vector<string> tokens;
+    std::string token;
+    std::istringstream tokenStream(request);
+    while (std::getline(tokenStream, token, ' '))
+    {
+        if (token != " " && !token.empty())
+        {
+            tokens.push_back(token);
+        }
+    }
+    return tokens;
 }
