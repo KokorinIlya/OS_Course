@@ -70,23 +70,20 @@ void process_show_info(dict_socket& socket, string const& name)
     socket.send(res);
 }
 
-bool process_client(dict_socket& socket)
+void process_define_request(dict_socket& socket, vector<string>& parts)
 {
-    read_result p = read_until_crlf(socket, "");
-    string request = p.querry;
-    std::replace(request.begin(), request.end(), '\t', ' ');
-    std::transform(request.begin(), request.end(), request.begin(), ::tolower);
-    vector<string> parts = parse_querry(request);
-    if (!parts.empty() && parts[0] == "client")
+    string database = parts[1];
+    string word = parts[2];
+    if (database != "*" && database != "!")
     {
-        cout << "CLIENT request: " << endl;
-        socket.send("250 ok client information received\r\n");
-        return true;
-    }
-    else
-    {
-        socket.send("500 Error, CLIENT request should be first\r\n");
-        return false;
+        if (dicts.count(database) == 0)
+        {
+            socket.send("550 Invalid database, use \"SHOW DB\" for list of databases\r\n");
+            return;
+        }
+        socket.send("150 n definitions retrieved - definitions follow\r\n");
+        socket.send("250 ok\r\n");
+        return;
     }
 }
 
@@ -165,6 +162,11 @@ bool process_request(dict_socket& socket, string const& request, bool first)
         cout << "CLIENT request: " << endl;
         socket.send("250 ok client information received\r\n");
     }
+    else if (parts.size() == 3 && parts[0] == "define")
+    {
+        cout << "DEFINE request: " << endl;
+        process_define_request(socket, parts);
+    }
     else
     {
         socket.send("502 Command not implemented\r\n");
@@ -209,6 +211,7 @@ int main(int argc, char* argv[])
 
             do
             {
+                //cout << "Reading" << endl;
                 res = read_until_crlf(socket, rem);
                 request = res.querry;
                 rem = res.remainder;

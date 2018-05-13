@@ -20,6 +20,12 @@ string get_error_description()
 
 read_result read_until_crlf(dict_socket& socket, string const& init)
 {
+    if (init.size() >= 2 && init[init.size() - 1] == '\n' &&
+            init[init.size() - 2] == '\r')
+    {
+        return {init, "", false};
+    }
+
     string res = init;
 
     string cur;
@@ -31,8 +37,9 @@ read_result read_until_crlf(dict_socket& socket, string const& init)
         if (crlf_pos != string::npos)
         {
             res += cur.substr(0, crlf_pos);
-            //cout << "Res: " << res  << ", Cur: " << cur << endl;
-            return {res, cur.substr(crlf_pos + 2), false};
+            string remainder = cur.substr(crlf_pos + 2);
+            //cout << "Res: " << res  << ", Rem: " << remainder << endl;
+            return {res, remainder, false};
         }
         if (has_cr)
         {

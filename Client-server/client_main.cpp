@@ -52,6 +52,31 @@ string get_request(vector<string> const& v)
     return res + "\r\n";
 }
 
+void send_define_request(dict_socket& socket, string const& request)
+{
+    socket.send(request);
+    cout << "Request send" << endl;
+    read_result find_result = read_until_crlf(socket, "");
+    if (find_result.querry.substr(0, 3) == "550" ||
+            find_result.querry.substr(0, 3) == "552")
+    {
+        cout << "Response received: " << find_result.querry << endl;
+        return;
+    }
+    cout << "Responses: " << endl;
+    string cur = find_result.querry;
+    cout << cur << endl;
+    string rem = find_result.remainder;
+    do
+    {
+        //cout << "Reading" << endl;
+        find_result = read_until_crlf(socket, rem);
+        cur = find_result.querry;
+        rem = find_result.remainder;
+        cout << cur << endl;
+    } while (cur.substr(0, 3) != "250");
+}
+
 void process_request(dict_socket& socket, string const& request)
 {
     vector<string> parts = parse_querry(request);
@@ -101,6 +126,11 @@ void process_request(dict_socket& socket, string const& request)
     {
         cout << "QUIT request" << endl;
         cout << "Response received: " << send_trivial_request(socket, true_request) << endl;
+    }
+    else if (parts.size() == 3 && parts[0] == "define")
+    {
+        cout << "DEFINE request" << endl;
+        send_define_request(socket, true_request);
     }
     else
     {
