@@ -30,8 +30,8 @@ bool need_to_terminate = false;
 void sigint_handler(int signum)
 {
     cout << "SIGINT catched, exiting...";
-    listener.close();
-    epoll.close();
+    //listener.close();
+    //epoll.close();
     need_to_terminate = true;
 }
 
@@ -54,7 +54,6 @@ int main(int argc, char* argv[])
 
     epoll.create(SERVER_SIZE);
     epoll.add_listener(listener);
-
 
     while (!need_to_terminate)
     {
