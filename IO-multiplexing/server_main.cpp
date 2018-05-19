@@ -5,8 +5,10 @@
 #include <iostream>
 #include <csignal>
 #include <unistd.h>
+#include <map>
 #include "raii_socket.h"
 #include "raii_epoll.h"
+#include "utils.h"
 
 using std::cout;
 using std::cin;
@@ -15,6 +17,7 @@ using std::endl;
 using std::string;
 using std::vector;
 using std::to_string;
+using std::map;
 
 const int SERVER_SIZE = 10000;
 
@@ -29,6 +32,8 @@ void sigint_handler(int signum)
     epoll.close();
     need_to_terminate = true;
 }
+
+map<int, string> cur_remainder;
 
 
 int main(int argc, char* argv[])
@@ -61,6 +66,7 @@ int main(int argc, char* argv[])
                 cout << "Connected new client, file descriptor number is " +
                         to_string(client_fd) << endl;
                 epoll.add_for_reading(client_fd);
+                cur_remainder[client_fd] = "";
             }
             else if (event.events & (EPOLLRDHUP | EPOLLHUP | EPOLLERR))
             {
@@ -69,6 +75,12 @@ int main(int argc, char* argv[])
                     cout << "Error on client occured, closing..." << endl;
                 }
                 int fd = event.data.fd;
+
+                if (cur_remainder.count(fd) > 0)
+                {
+                    cur_remainder.erase(fd);
+                }
+
                 cout << "Closing client " + to_string(fd) << endl;
                 if (close(fd) == -1)
                 {
@@ -80,7 +92,16 @@ int main(int argc, char* argv[])
             {
                 int fd = event.data.fd;
                 cout << "Client with file descriptor " + to_string(fd) + " is ready for reading" << endl;
+                raii_socket not_closable(fd);
+                string remainder = cur_remainder[fd];
+                read_result res = read_until_crlf(not_closable, remainder);
+                if (!res.empty_input)
+                {
+                    cur_remainder[fd] = res.remainder;
 
+                    string request = res.querry;
+                    cout << "Request: " + request << endl;
+                }
             }
         }
     }

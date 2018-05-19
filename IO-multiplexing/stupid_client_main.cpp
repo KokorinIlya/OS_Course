@@ -55,5 +55,7 @@ int main(int argc, char* argv[])
     usleep(5000 * 1000);
     cout << "After sleep" << endl;
 
+    socket.send("TEST MESSAGE\r\n");
+
     exit(EXIT_SUCCESS);
 }

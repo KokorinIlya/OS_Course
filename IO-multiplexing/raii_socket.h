@@ -13,10 +13,12 @@ struct raii_socket
 private:
     int fd;
 
-    explicit raii_socket(int _fd);
+    bool need_to_close;
 
 public:
     // General:
+
+    explicit raii_socket(int _fd) noexcept;
 
     raii_socket() noexcept;
 

@@ -16,7 +16,7 @@
 using std::string;
 using std::pair;
 
-raii_socket::raii_socket() noexcept : fd(-1) {}
+raii_socket::raii_socket() noexcept : fd(-1), need_to_close(true) {}
 
 void raii_socket::create()
 {
@@ -38,7 +38,7 @@ void raii_socket::create()
 
 raii_socket::~raii_socket()
 {
-    if (fd != -1)
+    if (fd != -1 && need_to_close)
     {
         try
         {
@@ -158,7 +158,7 @@ int raii_socket::accept()
     return socket_fd;
 }
 
-raii_socket::raii_socket(int _fd) : fd(_fd) {}
+raii_socket::raii_socket(int _fd) noexcept : fd(_fd), need_to_close(false) {}
 
 void raii_socket::close()
 {
