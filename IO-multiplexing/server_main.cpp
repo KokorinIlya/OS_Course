@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
             {
                 if (event.events & EPOLLERR)
                 {
-                    cout << "Error on client occured, closing..." << endl;
+                    cout << "Error on client occurred, closing..." << endl;
                 }
                 int fd = event.data.fd;
 
