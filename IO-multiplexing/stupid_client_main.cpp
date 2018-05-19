@@ -7,6 +7,7 @@
 #include <iostream>
 #include <vector>
 #include "raii_socket.h"
+#include "utils.h"
 
 using std::cout;
 using std::endl;
@@ -56,6 +57,10 @@ int main(int argc, char* argv[])
     cout << "After sleep" << endl;
 
     socket.send("TEST MESSAGE\r\n");
+
+    string response = read_until_crlf(socket, "").querry;
+
+    cout << response << endl;
 
     exit(EXIT_SUCCESS);
 }

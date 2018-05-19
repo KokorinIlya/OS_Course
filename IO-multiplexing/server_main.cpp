@@ -6,6 +6,7 @@
 #include <csignal>
 #include <unistd.h>
 #include <map>
+#include <set>
 #include "raii_socket.h"
 #include "raii_epoll.h"
 #include "utils.h"
@@ -18,6 +19,7 @@ using std::string;
 using std::vector;
 using std::to_string;
 using std::map;
+using std::set;
 
 const int SERVER_SIZE = 10000;
 
@@ -34,7 +36,7 @@ void sigint_handler(int signum)
 }
 
 map<int, string> cur_remainder;
-
+map <int, vector<string>> responses;
 
 int main(int argc, char* argv[])
 {
@@ -65,7 +67,7 @@ int main(int argc, char* argv[])
                 int client_fd = listener.accept();
                 cout << "Connected new client, file descriptor number is " +
                         to_string(client_fd) << endl;
-                epoll.add_for_reading(client_fd);
+                epoll.add_new_event(client_fd, EPOLLIN | EPOLLRDHUP | EPOLLHUP | EPOLLERR);
                 cur_remainder[client_fd] = "";
             }
             else if (event.events & (EPOLLRDHUP | EPOLLHUP | EPOLLERR))
@@ -79,6 +81,11 @@ int main(int argc, char* argv[])
                 if (cur_remainder.count(fd) > 0)
                 {
                     cur_remainder.erase(fd);
+                }
+
+                if (responses.count(fd) > 0)
+                {
+                    responses.erase(fd);
                 }
 
                 cout << "Closing client " + to_string(fd) << endl;
@@ -100,7 +107,36 @@ int main(int argc, char* argv[])
                     cur_remainder[fd] = res.remainder;
 
                     string request = res.querry;
-                    cout << "Request: " + request << endl;
+                    cout << "Request received from client with file descriptor "
+                            + to_string(fd) + ": " + request << endl;
+
+                    string response = "Hello, " + request;
+
+                    if (responses.count(fd) == 0)
+                    {
+                        responses[fd] = vector<string>();
+                        epoll.modify_event(fd, EPOLLOUT | EPOLLIN | EPOLLRDHUP | EPOLLHUP | EPOLLERR);
+                    }
+                    responses[fd].push_back(response);
+                }
+            }
+            else if (event.events & EPOLLOUT)
+            {
+                int fd = event.data.fd;
+                cout << "Client with file descriptor " + to_string(fd) + " is ready for writing" << endl;
+                raii_socket not_closable(fd);
+
+                string response = responses[fd].back();
+                responses[fd].pop_back();
+                not_closable.send(response + "\r\n");
+
+                cout << "Response sent to client with file descriptor "
+                        + to_string(fd) + ": " + response << endl;
+
+                if (responses[fd].empty())
+                {
+                    responses.erase(fd);
+                    epoll.modify_event(fd, EPOLLIN | EPOLLRDHUP | EPOLLHUP | EPOLLERR);
                 }
             }
         }

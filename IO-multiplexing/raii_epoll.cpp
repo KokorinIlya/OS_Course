@@ -84,16 +84,38 @@ vector<struct epoll_event> raii_epoll::await()
 
 }
 
-void raii_epoll::add_for_reading(int fd)
+void raii_epoll::add_new_event(int fd, uint32_t events)
 {
     struct epoll_event event{};
-    event.events = EPOLLIN | EPOLLHUP | EPOLLRDHUP;
+    event.events = events;
     event.data.fd = fd;
     int res = epoll_ctl(epoll_fd, EPOLL_CTL_ADD, fd, &event);
     if (res == -1)
     {
-        perror("Error adding socket for reading: ");
-        throw runtime_error("Error adding socket for reading: " + get_error_description());
+        perror("Error adding new event: ");
+        throw runtime_error("Error adding new event: " + get_error_description());
+    }
+}
+
+void raii_epoll::delete_event(int fd)
+{
+    if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, nullptr) == -1)
+    {
+        perror("Error deleting event: ");
+        throw runtime_error("Error deleting event: " + get_error_description());
+    }
+}
+
+void raii_epoll::modify_event(int fd, uint32_t events)
+{
+    struct epoll_event event{};
+    event.events = events;
+    event.data.fd = fd;
+    int res = epoll_ctl(epoll_fd, EPOLL_CTL_MOD, fd, &event);
+    if (res == -1)
+    {
+        perror("Error modifying event: ");
+        throw runtime_error("Error modifying event: " + get_error_description());
     }
 }
 

@@ -29,7 +29,11 @@ public:
 
     void add_listener(raii_socket const& socket);
 
-    void add_for_reading(int fd);
+    void add_new_event(int fd, uint32_t events);
+
+    void modify_event(int fd, uint32_t events);
+
+    void delete_event(int fd);
 
     std::vector<struct epoll_event> await();
 
