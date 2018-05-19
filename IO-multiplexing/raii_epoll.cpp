@@ -23,9 +23,10 @@ void raii_epoll::close()
 {
     if (::close(epoll_fd) == -1)
     {
-        perror("Error closing");
+        perror("Error closing epoll");
         throw runtime_error("Error closing epoll: " + get_error_description());
     }
+    epoll_fd = -1;
 }
 
 raii_epoll::~raii_epoll()

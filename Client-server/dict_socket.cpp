@@ -37,7 +37,11 @@ dict_socket::~dict_socket()
 {
     if (fd != -1)
     {
-        close();
+        try
+        {
+            close();
+        }
+        catch (...) {}
     }
 }
 
@@ -156,6 +160,11 @@ dict_socket::dict_socket(int _fd) : fd(_fd) {}
 void dict_socket::close()
 {
     //std::cout << "Closed " << fd << std::endl;
+    if (::close(fd) == -1)
+    {
+        perror("Error closing socket: ");
+        throw std::runtime_error("Error closing socket: " + get_error_description());
+    }
     ::close(fd);
     fd = -1;
 }

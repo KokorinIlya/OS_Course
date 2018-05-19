@@ -163,7 +163,11 @@ raii_socket::raii_socket(int _fd) noexcept : fd(_fd), need_to_close(false) {}
 void raii_socket::close()
 {
     std::cout << "Destructed socket " + std::to_string(fd) << std::endl;
-    ::close(fd);
+    if (::close(fd) == -1)
+    {
+        perror("Error closing socket");
+        throw std::runtime_error("Error closing socket: " + get_error_description());
+    }
     fd = -1;
 }
 

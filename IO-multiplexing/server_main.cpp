@@ -30,9 +30,10 @@ bool need_to_terminate = false;
 void sigint_handler(int signum)
 {
     cout << "SIGINT catched, exiting...";
-    //listener.close();
-    //epoll.close();
+    listener.close();
+    epoll.close();
     need_to_terminate = true;
+    exit(EXIT_SUCCESS);
 }
 
 map<int, string> cur_remainder;
