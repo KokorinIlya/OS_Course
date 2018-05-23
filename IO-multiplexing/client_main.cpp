@@ -75,7 +75,9 @@ int main(int argc, char* argv[])
     vector <string> requests;
     string remainder;
 
-    while (!need_to_terminate)
+    size_t not_answered = 0;
+
+    while (!need_to_terminate || not_answered > 0)
     {
         vector<epoll_event> events = epoll.await();
 
@@ -122,6 +124,7 @@ int main(int argc, char* argv[])
                     remainder = r.remainder;
                     string response = r.querry;
                     cout << "Response received: " + response << endl;
+                    not_answered--;
                 }
                 if (event.events & EPOLLOUT)
                 {
@@ -133,6 +136,7 @@ int main(int argc, char* argv[])
                                            EPOLLRDHUP | EPOLLHUP | EPOLLERR | EPOLLIN);
                     }
                     socket.send(request + "\r\n");
+                    not_answered++;
                 }
             }
         }
