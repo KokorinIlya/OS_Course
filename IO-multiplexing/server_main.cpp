@@ -98,13 +98,14 @@ int main(int argc, char* argv[])
             else if(event.events & EPOLLIN)
             {
                 int fd = event.data.fd;
-                cout << "Client with file descriptor " + to_string(fd) + " is ready for reading" << endl;
+                cout << "Client with file descriptor " + to_string(fd) +
+                        " is ready for reading" << endl;
                 raii_socket not_closable(fd);
                 string remainder = cur_remainder[fd];
                 read_result res = read_until_crlf(not_closable, remainder);
+                cur_remainder[fd] = res.remainder;
                 if (!res.empty_input)
                 {
-                    cur_remainder[fd] = res.remainder;
 
                     string request = res.querry;
                     cout << "Request received from client with file descriptor "
@@ -115,7 +116,9 @@ int main(int argc, char* argv[])
                     if (responses.count(fd) == 0)
                     {
                         responses[fd] = vector<string>();
-                        epoll.modify_event(fd, EPOLLOUT | EPOLLIN | EPOLLRDHUP | EPOLLHUP | EPOLLERR);
+                        epoll.modify_event(
+                                fd, EPOLLOUT | EPOLLIN | EPOLLRDHUP | EPOLLHUP | EPOLLERR
+                        );
                     }
                     responses[fd].push_back(response);
                 }

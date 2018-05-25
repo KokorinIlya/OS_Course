@@ -22,32 +22,13 @@ read_result read_until_crlf(raii_socket& socket, string const& init)
 
     string res = init;
 
-    string cur;
-    bool has_cr = false;
-
-    while (!(cur = socket.recieve().first).empty())
+    string cur = socket.recieve().first;
+    size_t crlf_pos = cur.find("\r\n");
+    if (crlf_pos != string::npos)
     {
-        size_t crlf_pos = cur.find("\r\n");
-        //cout << "Cur: " << cur << endl;
-        if (crlf_pos != string::npos)
-        {
-            res += cur.substr(0, crlf_pos);
-            string remainder = cur.substr(crlf_pos + 2);
-            //cout << "Res: " << res  << ", Rem: " << remainder << endl;
-            return {res, remainder, false};
-        }
-        if (has_cr)
-        {
-            if (!cur.empty() && cur[0] == '\n')
-            {
-                //cout << "Res: " << res  << ", Cur: " << cur << endl;
-                return {res.substr(0, res.size() - 1), cur.substr(1), false};
-            }
-        }
-        if (!cur.empty())
-        {
-            has_cr = (cur[cur.size() - 1] == '\r');
-        }
+        res += cur.substr(0, crlf_pos);
+        string remainder = cur.substr(crlf_pos + 2);
+        return {res, remainder, false};
     }
-    return {"", "", true};
+    return {"", init + cur, true};
 }
