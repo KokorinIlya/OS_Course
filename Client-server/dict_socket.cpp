@@ -165,7 +165,6 @@ void dict_socket::close()
         perror("Error closing socket: ");
         throw std::runtime_error("Error closing socket: " + get_error_description());
     }
-    ::close(fd);
     fd = -1;
 }
 
