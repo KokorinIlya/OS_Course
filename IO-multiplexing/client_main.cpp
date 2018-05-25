@@ -117,11 +117,11 @@ int main(int argc, char* argv[])
                 if (event.events & EPOLLIN)
                 {
                     read_result r = read_until_crlf(socket, remainder);
+                    remainder = r.remainder;
                     if (r.empty_input)
                     {
                         continue;
                     }
-                    remainder = r.remainder;
                     string response = r.querry;
                     cout << "Response received: " + response << endl;
                     not_answered--;
