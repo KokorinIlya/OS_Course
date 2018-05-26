@@ -18,4 +18,4 @@ run-client: client
 	./client $(ADDRESS) $(PORT)
 
 clean:
-	rm -rf server *.o
+	rm -rf server client *.o
