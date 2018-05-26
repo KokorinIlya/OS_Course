@@ -256,7 +256,7 @@ https://tools.ietf.org/html/rfc2229
     2. make client - собрать клиента.
     3. make server - собрать сервер.
     4. make run-client SOCK_NAME=name A=a B=b - запустить клиента, передав ему name в качестве имени 
-    файла, представляющего Unix-сокет в файловой системе, a в качестве певрого числа, b в качестве второго. 
+    файла, представляющего Unix-сокет в файловой системе, a в качестве первого числа, b в качестве второго. 
     Например, make run-client SOCK_NAME=unix_socket A=13 B=37
     5. make run-server SOCK_NAME=name - запустить сервер,передав ему name в качестве имени 
     файла, представляющего Unix-сокет в файловой системе. Например, make run-server  SOCK_NAME=unix_socket
