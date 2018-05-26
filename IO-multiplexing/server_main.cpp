@@ -131,10 +131,22 @@ int main(int argc, char* argv[])
 
                 string response = responses[fd].back();
                 responses[fd].pop_back();
-                not_closable.send(response + "\r\n");
+                string send_rem = not_closable.send(response + "\r\n");
+                if (!send_rem.empty())
+                {
+                    responses[fd].push_back(send_rem);
+                    cout << "Sending response to client with file descriptor"
+                            + to_string(fd) << " wasn't completed, remainder is: "
+                         << response << endl;
 
-                cout << "Response sent to client with file descriptor "
-                        + to_string(fd) + ": " + response << endl;
+                }
+                else
+                {
+                    cout << "Response sent to client with file descriptor "
+                            + to_string(fd) + ": " + response << endl;
+                }
+
+
 
                 if (responses[fd].empty())
                 {

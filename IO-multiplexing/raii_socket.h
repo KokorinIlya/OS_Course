@@ -41,7 +41,7 @@ public:
 
     std::pair<std::string, ssize_t> recieve();
 
-    void send(std::string const& s);
+    std::string send(std::string const& s);
 
     int get_socket_descriptor() const;
 

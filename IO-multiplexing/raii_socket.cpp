@@ -81,23 +81,20 @@ pair<string, ssize_t> raii_socket::recieve()
     return std::make_pair(string(buffer), bytes_read);
 }
 
-void raii_socket::send(std::string const &s)
+string raii_socket::send(std::string const &s)
 {
     char const* buf = s.c_str();
     size_t len = s.size();
 
-    size_t totally_sent = 0;
-    while (totally_sent < len)
+    ssize_t sent = write(fd, buf, len);
+    if (sent == -1)
     {
-        ssize_t sent = write(fd, buf + totally_sent, len - totally_sent);
-        if (sent == -1)
-        {
-            perror("Write error");
-            throw std::runtime_error("error writing to raii_socket: "
-                                     + get_error_description());
-        }
-        totally_sent += static_cast<size_t>(sent);
+        perror("Write error");
+        throw std::runtime_error("error writing to raii_socket: "
+                                 + get_error_description());
     }
+    string result = s.substr(static_cast<size_t>(sent));
+    return result;
 }
 
 void raii_socket::bind(uint16_t porn_num)

@@ -130,13 +130,25 @@ int main(int argc, char* argv[])
                 {
                     string request = requests.back();
                     requests.pop_back();
+                    string send_remainder = socket.send(request + "\r\n");
+
+                    if (send_remainder.empty())
+                    {
+                        cout << "Request " << request << " was send" << endl;
+                        not_answered++;
+                    }
+                    else
+                    {
+                        cout << "Request " << request << " wasn't completely sent, remainder is"
+                                                         << send_remainder << endl;
+                       requests.push_back(send_remainder);
+                    }
+
                     if (requests.empty())
                     {
                         epoll.modify_event(socket.get_socket_descriptor(),
                                            EPOLLRDHUP | EPOLLHUP | EPOLLERR | EPOLLIN);
                     }
-                    socket.send(request + "\r\n");
-                    not_answered++;
                 }
             }
         }
