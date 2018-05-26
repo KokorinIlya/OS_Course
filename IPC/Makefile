@@ -1,6 +1,6 @@
 .PHONY: all clean
 
-all: server
+all: server client
 
 %.o: %.cpp
 	g++ -std=c++17 -c -o $@ $^
