@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
                                 fd, EPOLLOUT | EPOLLIN | EPOLLRDHUP | EPOLLHUP | EPOLLERR
                         );
                     }
-                    responses[fd].push_back(response);
+                    responses[fd].push_back(response + "\r\n");
                 }
             }
             else if (event.events & EPOLLOUT)
@@ -131,22 +131,12 @@ int main(int argc, char* argv[])
 
                 string response = responses[fd].back();
                 responses[fd].pop_back();
-                string send_rem = not_closable.send(response + "\r\n");
+                string send_rem = not_closable.send(response);
                 if (!send_rem.empty())
                 {
                     responses[fd].push_back(send_rem);
-                    cout << "Sending response to client with file descriptor"
-                            + to_string(fd) << " wasn't completed, remainder is: "
-                         << response << endl;
 
                 }
-                else
-                {
-                    cout << "Response sent to client with file descriptor "
-                            + to_string(fd) + ": " + response << endl;
-                }
-
-
 
                 if (responses[fd].empty())
                 {

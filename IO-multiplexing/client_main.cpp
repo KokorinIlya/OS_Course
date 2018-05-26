@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
                     epoll.modify_event(socket.get_socket_descriptor(),
                                        EPOLLOUT | EPOLLRDHUP | EPOLLHUP | EPOLLERR | EPOLLIN);
                 }
-                requests.push_back(request);
+                requests.push_back(request + "\r\n");
             }
             else if (event.events & (EPOLLRDHUP | EPOLLHUP | EPOLLERR))
             {
@@ -130,17 +130,14 @@ int main(int argc, char* argv[])
                 {
                     string request = requests.back();
                     requests.pop_back();
-                    string send_remainder = socket.send(request + "\r\n");
+                    string send_remainder = socket.send(request);
 
                     if (send_remainder.empty())
                     {
-                        cout << "Request " << request << " was send" << endl;
                         not_answered++;
                     }
                     else
                     {
-                        cout << "Request " << request << " wasn't completely sent, remainder is"
-                                                         << send_remainder << endl;
                        requests.push_back(send_remainder);
                     }
 
