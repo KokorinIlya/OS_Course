@@ -63,17 +63,17 @@ int main(int argc, char* argv[])
 
     raii_socket socket{};
     socket.create();
-    socket.connect(address, port_num);
 
     bool need_to_terminate = false;
     raii_epoll epoll;
 
     epoll.create(2);
     epoll.add_new_event(STDIN_FILENO, EPOLLIN);
-    epoll.add_new_event(socket.get_socket_descriptor(), EPOLLRDHUP | EPOLLHUP | EPOLLERR | EPOLLIN);
+    epoll.add_new_event(socket.get_socket_descriptor(), EPOLLOUT);
 
     vector <string> requests;
     string remainder;
+    bool connected = false;
 
     size_t not_answered = 0;
 
@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
                 }
                 requests.push_back(request + "\r\n");
             }
-            else if (event.events & (EPOLLRDHUP | EPOLLHUP | EPOLLERR))
+            else if ((event.events & (EPOLLRDHUP | EPOLLHUP | EPOLLERR)) && connected)
             {
                 if (event.events & EPOLLERR)
                 {
@@ -128,23 +128,31 @@ int main(int argc, char* argv[])
                 }
                 if (event.events & EPOLLOUT)
                 {
-                    string request = requests.back();
-                    requests.pop_back();
-                    string send_remainder = socket.send(request);
-
-                    if (send_remainder.empty())
+                    if (!connected)
                     {
-                        not_answered++;
+                        socket.connect(address, port_num);
+                        connected = true;
+                        cout << "Connected" << endl;
+                        epoll.modify_event(socket.get_socket_descriptor(),
+                                           EPOLLRDHUP | EPOLLHUP | EPOLLERR | EPOLLIN);
                     }
                     else
                     {
-                       requests.push_back(send_remainder);
-                    }
+                        string request = requests.back();
+                        requests.pop_back();
+                        string send_remainder = socket.send(request);
 
-                    if (requests.empty())
-                    {
-                        epoll.modify_event(socket.get_socket_descriptor(),
-                                           EPOLLRDHUP | EPOLLHUP | EPOLLERR | EPOLLIN);
+                        if (send_remainder.empty()) {
+                            not_answered++;
+                        } else {
+                            requests.push_back(send_remainder);
+                        }
+
+                        if (requests.empty())
+                        {
+                            epoll.modify_event(socket.get_socket_descriptor(),
+                                               EPOLLRDHUP | EPOLLHUP | EPOLLERR | EPOLLIN);
+                        }
                     }
                 }
             }
