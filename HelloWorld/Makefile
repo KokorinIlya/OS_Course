@@ -2,7 +2,7 @@
 
 all: helloWorld
 
-%.0: %.c
+%.o: %.c
 	gcc -c -o $@ $^ 
 
 helloWorld: main.o helloImpl.o
